@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>G0DM0D3 — Deploy Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080b08;
+      --surface:   #0f130f;
+      --surface2:  #161c16;
+      --border:    #1f2d1f;
+      --green:     #00ff41;
+      --green-dim: #00c832;
+      --green-glow:#00ff4122;
+      --amber:     #ffb300;
+      --blue:      #4fc3f7;
+      --red:       #ff4444;
+      --text:      #c8d8c8;
+      --muted:     #5a7a5a;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Scanline overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 72px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-tag::before {
+      content: '';
+      width: 24px; height: 1px;
+      background: var(--green);
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 700;
+      color: var(--green);
+      text-shadow: 0 0 24px var(--green-glow);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span {
+      color: var(--text);
+      text-shadow: none;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 560px;
+      margin-bottom: 32px;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px; height: 1.1em;
+      background: var(--green);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── Arch summary cards ── */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 40px 0;
+    }
+
+    .arch-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px 18px;
+    }
+
+    .arch-card-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .arch-card-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .arch-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Section headings ── */
+    .section {
+      padding: 56px 0 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .section-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .section-title .accent { color: var(--green); }
+
+    /* ── Option cards ── */
+    .option-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 0 4px 4px 0;
+      padding: 28px 28px 24px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .option-card.amber { border-left-color: var(--amber); }
+    .option-card.amber .option-badge { background: var(--amber); color: #000; }
+    .option-card.amber .option-cmd { border-left-color: var(--amber); }
+
+    .option-card.blue { border-left-color: var(--blue); }
+    .option-card.blue .option-badge { background: var(--blue); color: #000; }
+    .option-card.blue .option-cmd { border-left-color: var(--blue); }
+
+    .option-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .option-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--green);
+      color: #000;
+      padding: 3px 8px;
+      border-radius: 2px;
+    }
+
+    .option-title {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .option-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Terminal code blocks ── */
+    .terminal {
+      background: #050805;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .terminal-bar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #ffbd2e; }
+    .dot.g { background: #28ca41; }
+
+    .terminal-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 6px;
+      letter-spacing: 0.08em;
+    }
+
+    .terminal-body {
+      padding: 16px 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: #9ab89a;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .terminal-body .prompt { color: var(--green); }
+    .terminal-body .comment { color: var(--muted); }
+    .terminal-body .cmd { color: #e0e0e0; }
+    .terminal-body .flag { color: var(--blue); }
+    .terminal-body .val { color: var(--amber); }
+
+    /* ── Platforms row ── */
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .platform-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 3px 10px;
+    }
+
+    /* ── Env table ── */
+    .env-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 13px;
+      margin: 16px 0;
+    }
+
+    .env-table th {
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 6px 12px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .env-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .env-table tr:last-child td { border-bottom: none; }
+
+    .env-key { color: var(--amber); }
+    .env-req { color: var(--green); font-size: 11px; }
+    .env-opt { color: var(--muted); font-size: 11px; }
+    .env-desc { color: var(--text); font-family: var(--sans); font-size: 13px; }
+
+    /* ── Decision table ── */
+    .decision-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 28px 0;
+    }
+
+    .decision-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .decision-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .decision-table tr:last-child td { border-bottom: none; }
+
+    .decision-table tr:hover td { background: var(--surface); }
+
+    .goal-text { color: var(--text); font-size: 14px; }
+    .rec-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .rec-1 { background: var(--green-glow); color: var(--green); border: 1px solid #00ff4144; }
+    .rec-2 { background: rgba(255,179,0,0.1); color: var(--amber); border: 1px solid rgba(255,179,0,0.25); }
+    .rec-3 { background: rgba(79,195,247,0.1); color: var(--blue); border: 1px solid rgba(79,195,247,0.25); }
+
+    .where-text { color: var(--muted); font-size: 13px; font-family: var(--mono); }
+
+    /* ── Docker compose diagram ── */
+    .stack-diagram {
+      background: #050805;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px 28px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 2;
+      margin: 20px 0;
+      color: var(--muted);
+    }
+
+    .stack-diagram .box {
+      display: inline-block;
+      border: 1px solid var(--border);
+      padding: 2px 12px;
+      border-radius: 2px;
+    }
+
+    .stack-diagram .g { color: var(--green); border-color: #00ff4133; }
+    .stack-diagram .b { color: var(--blue);  border-color: rgba(79,195,247,0.25); }
+    .stack-diagram .a { color: var(--amber); border-color: rgba(255,179,0,0.25); }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 72px;
+      padding: 28px 0 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer p {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    footer a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .arch-grid { grid-template-columns: 1fr; }
+      .hero { padding: 48px 0 32px; }
+      .section { padding-top: 40px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── HERO ── -->
+  <header class="hero">
+    <div class="hero-tag">Deployment Guide</div>
+    <h1>G0DM0D3<span> /</span><br>Deploy Reference<span class="cursor"></span></h1>
+    <p>Three deployment paths for the liberated AI chat interface — from a single file drop to a full self-hosted Docker stack with a server-side API.</p>
+
+    <div class="arch-grid">
+      <div class="arch-card">
+        <div class="arch-card-label">App A</div>
+        <div class="arch-card-title">index.html</div>
+        <p>750 KB self-contained file. Vanilla HTML/JS. Zero build step. Runs anywhere.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label">App B</div>
+        <div class="arch-card-title">Next.js 14</div>
+        <p>React 18 · TypeScript · Tailwind. Static export via <code>npm run build</code>.</p>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-label">Backend</div>
+        <div class="arch-card-title">Express API</div>
+        <p>TypeScript server. Routes: chat, ultraplinian, autotune, parseltongue, health.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── OPTION 1 ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title"><span class="accent">Static HTML</span> — Single File Drop</h2>
+    </div>
+
+    <div class="option-card">
+      <div class="option-top">
+        <span class="option-badge">Simplest</span>
+        <span class="option-title">Upload index.html to any static host</span>
+      </div>
+      <p class="option-sub">No build, no Node, no server. Users supply their own OpenRouter API key from the Settings panel. The entire app — UI, logic, styles — is one file.</p>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <span class="terminal-label">bash</span>
+        </div>
+        <div class="terminal-body"><span class="comment"># Test locally</span>
+<span class="prompt">$</span> <span class="cmd">python3 -m http.server</span> <span class="val">8000</span>
+<span class="comment"># Open http://localhost:8000/index.html</span>
+
+<span class="comment"># Or with Node</span>
+<span class="prompt">$</span> <span class="cmd">npx serve .</span></div>
+      </div>
+
+      <div class="platforms">
+        <span class="platform-tag">☁ Cloudflare Pages</span>
+        <span class="platform-tag">▲ Vercel</span>
+        <span class="platform-tag">◈ Netlify</span>
+        <span class="platform-tag">🐙 GitHub Pages</span>
+        <span class="platform-tag">🤗 HuggingFace Spaces (static)</span>
+        <span class="platform-tag">Any nginx / Apache</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── OPTION 2 ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title"><span class="accent">Next.js</span> Static Export</h2>
+    </div>
+
+    <div class="option-card amber">
+      <div class="option-top">
+        <span class="option-badge">Recommended</span>
+        <span class="option-title">Build → deploy the /out folder</span>
+      </div>
+      <p class="option-sub">
+        <code>next.config.js</code> already has <code>output: 'export'</code> set.
+        The <code>_headers</code> and <code>_redirects</code> files are pre-configured for Netlify and Cloudflare Pages.
+        Users still supply their own OpenRouter key — no server required.
+      </p>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <span class="terminal-label">bash</span>
+        </div>
+        <div class="terminal-body"><span class="prompt">$</span> <span class="cmd">npm install</span>
+<span class="prompt">$</span> <span class="cmd">npm run build</span>
+<span class="comment"># Static output lands in  /out</span>
+
+<span class="comment"># Deploy the /out directory to your host of choice</span>
+<span class="prompt">$</span> <span class="cmd">npx wrangler pages deploy</span> <span class="val">out</span>    <span class="comment"># Cloudflare</span>
+<span class="prompt">$</span> <span class="cmd">netlify deploy</span> <span class="flag">--prod</span> <span class="flag">--dir=</span><span class="val">out</span>  <span class="comment"># Netlify</span></div>
+      </div>
+
+      <div class="platforms">
+        <span class="platform-tag">☁ Cloudflare Pages</span>
+        <span class="platform-tag">◈ Netlify</span>
+        <span class="platform-tag">▲ Vercel</span>
+        <span class="platform-tag">🐙 GitHub Pages</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── OPTION 3 ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title"><span class="accent">Docker</span> Full Stack</h2>
+    </div>
+
+    <div class="option-card blue">
+      <div class="option-top">
+        <span class="option-badge">Full Featured</span>
+        <span class="option-title">Frontend + API server via docker compose</span>
+      </div>
+      <p class="option-sub">
+        Use this when you want server-side features: shared OpenRouter key, AutoTune, dataset collection, multi-user hosting.
+        Two containers — an nginx frontend and a Node API server — orchestrated by Compose.
+      </p>
+
+      <div class="stack-diagram">
+        <span class="box b">Browser :3000</span>  ──►  <span class="box g">web (nginx) :80</span>
+                                  │
+               <span class="comment">/v1/* proxy</span>   │
+                                  ▼
+                        <span class="box a">api (Express) :7860</span>
+                                  │
+                         <span class="comment">OpenRouter API</span></div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <span class="terminal-label">bash</span>
+        </div>
+        <div class="terminal-body"><span class="comment"># 1 · Create your .env file</span>
+<span class="prompt">$</span> <span class="cmd">cp .env.example .env</span>
+<span class="comment">#   Add:  OPENROUTER_API_KEY=sk-or-...</span>
+<span class="comment">#   Add:  GODMODE_API_KEY=your-secret</span>
+
+<span class="comment"># 2 · Build and launch</span>
+<span class="prompt">$</span> <span class="cmd">docker compose up</span> <span class="flag">--build</span> <span class="flag">-d</span>
+
+<span class="comment"># 3 · Open  http://localhost:3000</span>
+
+<span class="comment"># To rebuild after code changes</span>
+<span class="prompt">$</span> <span class="cmd">docker compose up</span> <span class="flag">--build</span> <span class="flag">--force-recreate</span></div>
+      </div>
+
+      <div class="platforms">
+        <span class="platform-tag">🐳 Any VPS (DigitalOcean / Hetzner / Linode)</span>
+        <span class="platform-tag">☁ Railway</span>
+        <span class="platform-tag">🚀 Fly.io</span>
+        <span class="platform-tag">🤗 HF Spaces (Docker SDK)</span>
+      </div>
+    </div>
+
+    <!-- HF Spaces sub-card -->
+    <div class="option-card blue" style="border-left-color:#ffb300; margin-top:12px">
+      <div class="option-top">
+        <span class="option-badge amber" style="background:var(--amber)">API Only</span>
+        <span class="option-title">HuggingFace Spaces — Dockerfile</span>
+      </div>
+      <p class="option-sub">Deploy just the Express API to HF Spaces (Docker SDK). The root <code>Dockerfile</code> exposes port 7860, which HF Spaces expects.</p>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <span class="terminal-label">bash</span>
+        </div>
+        <div class="terminal-body"><span class="comment"># Build locally first to verify</span>
+<span class="prompt">$</span> <span class="cmd">docker build</span> <span class="flag">-t</span> <span class="val">g0dm0d3-api</span> <span class="flag">-f</span> Dockerfile .
+<span class="prompt">$</span> <span class="cmd">docker run</span> <span class="flag">-p</span> <span class="val">7860:7860</span> \
+    <span class="flag">-e</span> <span class="val">OPENROUTER_API_KEY</span>=sk-or-... \
+    <span class="flag">-e</span> <span class="val">GODMODE_API_KEY</span>=mysecret \
+    g0dm0d3-api
+
+<span class="comment"># Then push to HF Spaces repo as a Docker Space</span>
+<span class="comment"># Health check:  GET /v1/health  →  200 OK</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ENV VARS ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title"><span class="accent">Environment</span> Variables</h2>
+    </div>
+
+    <table class="env-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="env-key">OPENROUTER_API_KEY</span></td>
+          <td><span class="env-req">required</span></td>
+          <td class="env-desc">Your OpenRouter key — powers all model calls (50+ models). Get one at openrouter.ai/keys</td>
+        </tr>
+        <tr>
+          <td><span class="env-key">GODMODE_API_KEY</span></td>
+          <td><span class="env-req">required</span></td>
+          <td class="env-desc">Bearer token callers must send to authenticate against the API server. Set to any secret string.</td>
+        </tr>
+        <tr>
+          <td><span class="env-key">HF_TOKEN</span></td>
+          <td><span class="env-opt">optional</span></td>
+          <td class="env-desc">HuggingFace write token — only needed if you enable opt-in dataset publishing.</td>
+        </tr>
+        <tr>
+          <td><span class="env-key">HF_DATASET_REPO</span></td>
+          <td><span class="env-opt">optional</span></td>
+          <td class="env-desc">Target HF dataset repo (e.g. <code>yourname/g0dm0d3-research</code>). Pairs with HF_TOKEN.</td>
+        </tr>
+        <tr>
+          <td><span class="env-key">PORT</span></td>
+          <td><span class="env-opt">optional</span></td>
+          <td class="env-desc">API server port. Defaults to 7860 (HF Spaces standard). Change if running elsewhere.</td>
+        </tr>
+        <tr>
+          <td><span class="env-key">WEB_PORT</span></td>
+          <td><span class="env-opt">optional</span></td>
+          <td class="env-desc">Host port for the nginx frontend container. Defaults to 3000 in docker-compose.yml.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:13px; color:var(--muted); margin-top:8px;">
+      ⚠ Options 1 and 2 need <strong>no server-side env vars</strong> — users enter their own OpenRouter key directly in the Settings modal; it stays in their browser localStorage and is never sent to your server.
+    </p>
+  </section>
+
+  <!-- ── DECISION TABLE ── -->
+  <section class="section" style="padding-bottom:0">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title"><span class="accent">Pick</span> Your Path</h2>
+    </div>
+
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th>Goal</th>
+          <th>Best Option</th>
+          <th>Deploy to</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="goal-text">Fastest live deployment, no config</td>
+          <td><span class="rec-badge rec-1">Option 1 — index.html</span></td>
+          <td class="where-text">Cloudflare Pages drag-and-drop</td>
+        </tr>
+        <tr>
+          <td class="goal-text">Modern React UI, no server costs</td>
+          <td><span class="rec-badge rec-2">Option 2 — Next.js</span></td>
+          <td class="where-text">Netlify / Cloudflare Pages</td>
+        </tr>
+        <tr>
+          <td class="goal-text">Shared API key for a team, full features</td>
+          <td><span class="rec-badge rec-3">Option 3 — Docker Compose</span></td>
+          <td class="where-text">Any VPS / Railway / Fly.io</td>
+        </tr>
+        <tr>
+          <td class="goal-text">Research API only (no frontend)</td>
+          <td><span class="rec-badge rec-3">Option 3 — API Dockerfile</span></td>
+          <td class="where-text">Hugging Face Spaces (Docker SDK)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <p>G0DM0D3 · AGPL-3.0 · Made by Pliny the Prompter</p>
+    <p>Guide generated by <a href="https://claude.ai">Claude</a> · <a href="https://openrouter.ai/keys" target="_blank">Get OpenRouter key →</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
